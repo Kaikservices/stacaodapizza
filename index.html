@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Acerte o placar</title>
+</head>
+
+<body>
+
+<header>
+    <img src="img/f3566b07-fa89-46c1-8e27-9890a8345011-removebg-preview.png" alt="Acerte o placar">
+</header>
+
+<nav>
+    <a href="https://api.whatsapp.com/message/YBTSZNJIA45SD1?autoload=1&app_absent=0">Ajuda!</a>
+    <a href="https://www.instagram.com/stacao.da.pizza/">Nosso Instagram</a>
+</nav>
+
+<section id="regras">
+    <h2>Regras do Acerte o Placar </h2>
+    <ul>
+        <li>Escolha um jogo entre as opções disponíveis.</li>
+        <li>Um palpite por pessoa.</li>
+        <li>Seguir nosso Instagram, curtir, comentar e compartilhar o post mais recente.</li>
+        <li>Digite o placar que você acha que será o final da partida.</li>
+        <li>Placar só será aceito até início da partida.</li>
+        <li>Quem acertar o placar ganha um combo com dois hambúrgueres ou uma pizza gigante.</li>
+        <li>Se houver mais de 10 ganhadores, será uma pizza média</li>
+        <li>Os resultados serão divulgados após o término do jogo.</li>
+    </ul>
+</section>
+
+<div class="container">
+    <h1>Acerte o Placar</h1>
+    <p>Bem-vindo ao Acerte Placar! Se você acertar o placar, poderá escolher entre dois hambúrgueres ou uma pizza gigante.</p>
+
+    <div id="login">
+        <input type="text" id="nome" placeholder="Digite seu nome">
+        <button onclick="iniciarAposta()">Entrar</button>
+    </div>
+
+    <div id="aposta" style="display:none;">
+        <h2>Jogos Disponíveis</h2>
+        <div class="carrossel">
+            <button class="seta-esquerda" onclick="mudarJogo(-1)">&#9665;</button>
+            <div class="jogo-atual">
+                <img id="escudo1" src="img/atletico-mineiro-325x170.png" alt="Time 1" width="50">
+                <span>X</span>
+                <img id="escudo2" src="img/flamengo-325x170.png" alt="Time 2" width="50">
+                <p id="nome-jogo">Atlético Mineiro x Flamengo</p>
+            </div>
+            <button class="seta-direita" onclick="mudarJogo(1)">&#9655;</button>
+        </div>
+        <input type="text" id="placar" placeholder="Ex: 2-1">
+        <button onclick="fazerAposta()">Apostar</button>
+        <button onclick="mostrarResultados()">Ver Apostas</button>
+    </div>
+  
+    <div id="resultados" style="display:none;">
+        <h2>Apostas Feitas</h2>
+        <ul id="lista-apostas"></ul>
+    </div>
+  
+    <div id="placar-final" style="display:none;">
+        <h2>Placar Final</h2>
+        <input type="text" id="resultado" placeholder="Resultado Final (Ex: 2-1)">
+        <button onclick="definirResultado()">Definir Resultado</button>
+        <button onclick="mostrarGanhadores()">Mostrar Ganhadores</button>
+    </div>
+  
+    <div id="ganhadores" style="display:none;">
+        <h2>Ganhadores</h2>
+        <ul id="lista-ganhadores"></ul>
+    </div>
+</div>
+
+<script>
+    let jogos = [
+    { time1: "img/atletico-mineiro-325x170.png", time2: "img/flamengo-325x170.png", nome: "Atlético x Flamengo" },
+    { time1: "img/atletico-mineiro-325x170.png", time2: "img/america-mineiro-325x170.png", nome: "Atlético Mineiro x América" },
+    { time1: "img/atletico-mineiro-325x170.png", time2: "img/corinthians-325x170.png", nome: "Atlético Mineiro x Corinthians" }
+];
+
+let indiceJogo = 0;
+
+function mudarJogo(direcao) {
+    indiceJogo += direcao;
+    if (indiceJogo < 0) indiceJogo = jogos.length - 1;
+    if (indiceJogo >= jogos.length) indiceJogo = 0;
+
+    document.getElementById("escudo1").src = jogos[indiceJogo].time1;
+    document.getElementById("escudo2").src = jogos[indiceJogo].time2;
+    document.getElementById("nome-jogo").textContent = jogos[indiceJogo].nome;
+}
+
+function iniciarAposta() {
+    let nome = document.getElementById('nome').value;
+    if (nome.trim() === "") {
+        alert("Digite seu nome!");
+        return;
+    }
+    localStorage.setItem('nome', nome);
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('aposta').style.display = 'block';
+    document.getElementById('placar-final').style.display = 'block';
+}
+
+function fazerAposta() {
+    let nome = localStorage.getItem('nome');
+    let placar = document.getElementById('placar').value;
+
+    if (placar.trim() === "") {
+        alert("Digite o placar!");
+        return;
+    }
+
+    let aposta = { nome: nome, jogo: jogos[indiceJogo].nome, placar: placar };
+    let apostas = JSON.parse(localStorage.getItem('apostas')) || [];
+    apostas.push(aposta);
+    localStorage.setItem('apostas', JSON.stringify(apostas));
+
+    alert("Aposta realizada com sucesso!");
+    document.getElementById('placar').value = "";
+}
+
+function mostrarResultados() {
+    document.getElementById('resultados').style.display = 'block';
+    let lista = document.getElementById('lista-apostas');
+    lista.innerHTML = "";
+    let apostas = JSON.parse(localStorage.getItem('apostas')) || [];
+
+    apostas.forEach((aposta) => {
+        let item = `<li>${aposta.nome} apostou ${aposta.placar} em ${aposta.jogo}</li>`;
+        lista.innerHTML += item;
+    });
+}
+
+function definirResultado() {
+    let resultado = document.getElementById('resultado').value;
+    if (resultado.trim() === "") {
+        alert("Digite o resultado final!");
+        return;
+    }
+    localStorage.setItem('resultadoFinal', resultado);
+    alert("Resultado definido com sucesso!");
+}
+
+function mostrarGanhadores() {
+    let resultadoFinal = localStorage.getItem('resultadoFinal');
+    if (!resultadoFinal) {
+        alert("O resultado ainda não foi definido!");
+        return;
+    }
+
+    let apostas = JSON.parse(localStorage.getItem('apostas')) || [];
+    let ganhadores = apostas.filter(aposta => aposta.placar === resultadoFinal);
+
+    let listaGanhadores = document.getElementById('lista-ganhadores');
+    listaGanhadores.innerHTML = "";
+
+    if (ganhadores.length === 0) {
+        listaGanhadores.innerHTML = "<li>Ninguém acertou o placar.</li>";
+    } else {
+        ganhadores.forEach(ganhador => {
+            listaGanhadores.innerHTML += `<li>${ganhador.nome} acertou o placar ${ganhador.placar} no jogo ${ganhador.jogo}</li>`;
+        });
+    }
+
+    let divGanhadores = document.getElementById('ganhadores');
+    divGanhadores.style.display = 'block';
+
+    // Garante que a animação funcione mesmo que já tenha sido exibida antes
+    divGanhadores.classList.remove("fade-in");
+    void divGanhadores.offsetWidth; // Hack para reiniciar a animação
+    divGanhadores.classList.add("fade-in");
+}
+
+
+</script>
+
+</body>
+</html>
